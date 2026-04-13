@@ -3,7 +3,7 @@ import Poco from "commodetto/Poco";
 const render = new Poco(screen);
 const black = render.makeColor(0, 0, 0);
 const white = render.makeColor(255, 255, 255);
-const blue = render.makeColor(0, 0, 255);
+const blue = render.makeColor(0, 0, 170);
 const font = new render.Font('Gothic-Regular', 14)
 const fontBold = new render.Font('Gothic-Bold', 14)
 const fontDate = new render.Font('Roboto-Condensed', 21)
