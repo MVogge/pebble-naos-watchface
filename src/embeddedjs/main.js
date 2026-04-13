@@ -6,6 +6,8 @@ const white = render.makeColor(255, 255, 255);
 const blue = render.makeColor(0, 0, 255);
 const font = new render.Font('Gothic-Regular', 14)
 const fontBold = new render.Font('Gothic-Bold', 14)
+const fontDate = new render.Font('Roboto-Condensed', 21)
+const gray = render.makeColor(170, 170, 170)
 
 function getHandAngles(now) {
     const hours = now.getHours() % 12;
@@ -38,8 +40,11 @@ function drawTicks(cx, cy, radius) {
 
         const isOddHour = i % 5 === 0 && i % 10 !== 0;
         const isEvenHour = i % 5 === 0 && i % 10 === 0;
+        const is6Hour = i === 30;
         let tickLength = 6
-        if (isEvenHour) {
+        if (is6Hour) {
+            tickLength = 10;
+        } else if (isEvenHour) {
             tickLength = 13;
         } else if (isOddHour) {
             tickLength = render.width * 0.12;
@@ -93,6 +98,34 @@ function drawBranding() {
     render.drawText(msg, fontBold, black, x, y)
 }
 
+// Draw date at 6 o'clock position with frame shadow
+function drawDate(cx, cy, radius, date) {
+    const day = date.getDate();
+    const dayStr = day.toString();
+
+    const textWidth = render.getTextWidth(dayStr, fontDate);
+    const padding = 4;
+    const boxWidth = textWidth + padding;
+    const boxHeight = fontDate.height + padding;
+    const dateY = (cy + Math.sin(toRadians(180)) * radius * 0.8) - boxHeight;
+    const boxX = cx - boxWidth / 2;
+    const boxY = dateY - boxHeight / 2;
+
+    const shadowColor = gray;
+
+    // Top shadow
+    render.fillRectangle(shadowColor, boxX, boxY, boxWidth, 6);
+    // Right shadow
+    render.fillRectangle(shadowColor, boxX + boxWidth - 3, boxY, 3, boxHeight);
+    // Bottom shadow
+    render.fillRectangle(shadowColor, boxX, boxY + boxHeight - 1, boxWidth, 1);
+    // Left shadow
+    render.fillRectangle(shadowColor, boxX, boxY, 1, boxHeight);
+
+    // Draw day number centered
+    render.drawText(dayStr, fontDate, black, cx - textWidth / 2, dateY - fontDate.height / 2);
+}
+
 function drawAnalogClock(e) {
     const cx = render.width / 2;
     const cy = render.height / 2;
@@ -105,6 +138,7 @@ function drawAnalogClock(e) {
 
     drawTicks(cx, cy, radius);
     drawNumbers(cx, cy, radius);
+    drawDate(cx, cy, radius, e.date);
 
     drawBranding();
 
