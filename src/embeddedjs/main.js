@@ -4,6 +4,8 @@ const render = new Poco(screen);
 const black = render.makeColor(0, 0, 0);
 const white = render.makeColor(255, 255, 255);
 const blue = render.makeColor(0, 0, 255);
+const font = new render.Font('Gothic-Regular', 14)
+const fontBold = new render.Font('Gothic-Bold', 14)
 
 function getHandAngles(now) {
     const hours = now.getHours() % 12;
@@ -40,7 +42,7 @@ function drawTicks(cx, cy, radius) {
         if (isEvenHour) {
             tickLength = 13;
         } else if (isOddHour) {
-            tickLength = 30;
+            tickLength = render.width * 0.12;
             tickRadius = radius * 0.92;
         }
         const tickThickness = 1;
@@ -54,33 +56,6 @@ function drawTicks(cx, cy, radius) {
         const y2 = cy + Math.sin(radians) * outerR;
 
         render.drawLine(x1, y1, x2, y2, black, tickThickness);
-    }
-}
-
-// Draw simple digit using rectangles (horizontal/upright)
-function drawDigit(x, y, digit, color) {
-    const patterns = {
-        0: [[0, 1, 0], [1, 0, 1], [1, 0, 1], [1, 0, 1], [0, 1, 0]],
-        1: [[0, 1, 0], [1, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0]],
-        2: [[1, 1, 0], [0, 0, 1], [0, 1, 0], [1, 0, 0], [1, 1, 1]],
-        4: [[0, 1, 0], [0, 1, 0], [1, 0, 1], [1, 1, 1], [0, 0, 1]],
-        6: [[0, 1, 1], [1, 0, 0], [1, 1, 1], [1, 0, 1], [1, 1, 1]],
-        8: [[1, 1, 1], [1, 0, 1], [1, 1, 1], [1, 0, 1], [1, 1, 1]]
-    };
-
-    const pattern = patterns[digit];
-    if (!pattern) return;
-
-    const scale = 2;
-
-    for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 3; col++) {
-            if (pattern[row][col]) {
-                const px = x + (col - 1) * scale;
-                const py = y + (row - 2) * scale;
-                render.fillRectangle(color, px, py, scale, scale);
-            }
-        }
     }
 }
 
@@ -103,19 +78,19 @@ function drawNumbers(cx, cy, radius) {
         const x = cx + Math.cos(radians) * numRadius;
         const y = cy + Math.sin(radians) * numRadius;
 
-        const numStr = pos.num.toString();
+        const numStr = pos.num.toString().padStart(2, '0');
+        const width = render.getTextWidth(numStr, font);
 
-        if (numStr.length === 2) {
-            // For two-digit numbers (12 and 10) - place digits side by side horizontally
-            const spacing = 3;
-            const firstDigit = parseInt(numStr[0]);
-            const secondDigit = parseInt(numStr[1]);
-            drawDigit(x - spacing, y, firstDigit, black);
-            drawDigit(x + spacing, y, secondDigit, black);
-        } else {
-            drawDigit(x, y, pos.num, black);
-        }
+        render.drawText(numStr, font, black, x - width / 2, y - font.height / 2)
     }
+}
+
+function drawBranding() {
+    const msg = "P E B B L E";
+    const width = render.getTextWidth(msg, fontBold);
+    const x = (render.width - width) / 2;
+    const y = 70
+    render.drawText(msg, fontBold, black, x, y)
 }
 
 function drawAnalogClock(e) {
@@ -131,10 +106,12 @@ function drawAnalogClock(e) {
     drawTicks(cx, cy, radius);
     drawNumbers(cx, cy, radius);
 
+    drawBranding();
+
     drawHand(cx, cy, hourAngle, radius * 0.6, blue, 5);
     drawHand(cx, cy, minuteAngle, radius * 0.92, blue, 5);
 
-    render.drawCircle(blue, cx, cy, 6, 0, 360);
+    render.drawCircle(blue, cx, cy, 7, 0, 360);
 
     render.end();
 }
