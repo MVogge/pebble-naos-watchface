@@ -26,9 +26,71 @@ function toRadians(angle) {
 
 function drawHand(cx, cy, angle, length, color, thickness) {
     const radians = toRadians(angle);
-    const endX = cx + Math.cos(radians) * length;
-    const endY = cy + Math.sin(radians) * length;
-    render.drawLine(cx, cy, endX, endY, color, thickness);
+    const perpRad = radians + Math.PI / 2;
+
+    // Proportions for Naos-style hand
+    const shaftLength = length - 11;
+    const halfThick = thickness / 2;
+
+    // End of shaft (where tip begins)
+    const shaftEndX = cx + Math.cos(radians) * shaftLength;
+    const shaftEndY = cy + Math.sin(radians) * shaftLength;
+
+    // Tip point
+    const tipX = cx + Math.cos(radians) * length;
+    const tipY = cy + Math.sin(radians) * length;
+
+    // Draw shaft as simple thick line
+    render.drawLine(cx, cy, shaftEndX, shaftEndY, color, thickness);
+
+    // Draw tip as filled triangle using scanlines
+    const tipBaseX1 = shaftEndX + Math.cos(perpRad) * halfThick;
+    const tipBaseY1 = shaftEndY + Math.sin(perpRad) * halfThick;
+    const tipBaseX2 = shaftEndX - Math.cos(perpRad) * halfThick;
+    const tipBaseY2 = shaftEndY - Math.sin(perpRad) * halfThick;
+
+    // Triangle points: base1, base2, tip
+    const points = [
+        {x: tipBaseX1, y: tipBaseY1},
+        {x: tipBaseX2, y: tipBaseY2},
+        {x: tipX, y: tipY}
+    ];
+
+    // Find bounding box of tip
+    const minY = Math.min(tipBaseY1, tipBaseY2, tipY);
+    const maxY = Math.max(tipBaseY1, tipBaseY2, tipY);
+
+    // Fill triangle with horizontal scanlines
+    const steps = Math.ceil(maxY - minY);
+    for (let i = 0; i <= steps; i++) {
+        const y = minY + i;
+        if (y < 0 || y >= render.height) continue;
+
+        // Find intersections with triangle edges
+        const intersections = [];
+        for (let j = 0; j < 3; j++) {
+            const p1 = points[j];
+            const p2 = points[(j + 1) % 3];
+
+            // Check if edge crosses this y
+            if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) {
+                // Calculate intersection x
+                const t = (y - p1.y) / (p2.y - p1.y);
+                const x = p1.x + t * (p2.x - p1.x);
+                intersections.push(x);
+            }
+        }
+
+        // Draw line between intersection points
+        if (intersections.length >= 2) {
+            intersections.sort((a, b) => a - b);
+            const x1 = Math.max(0, intersections[0]);
+            const x2 = Math.min(render.width, intersections[1]);
+            if (x2 > x1) {
+                render.drawLine(x1, y, x2, y, color, 1);
+            }
+        }
+    }
 }
 
 // Draw tick marks - further inside (Naos style)
@@ -142,8 +204,8 @@ function drawAnalogClock(e) {
 
     drawBranding();
 
-    drawHand(cx, cy, hourAngle, radius * 0.6, blue, 5);
-    drawHand(cx, cy, minuteAngle, radius * 0.92, blue, 5);
+    drawHand(cx, cy, hourAngle, radius * 0.65, blue, 5);
+    drawHand(cx, cy, minuteAngle, radius * 0.95, blue, 5);
 
     render.drawCircle(blue, cx, cy, 7, 0, 360);
 
