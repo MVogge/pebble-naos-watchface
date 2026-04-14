@@ -29,14 +29,53 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .theme-list, .option-list {
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .theme-item {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .theme-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .theme-item.selected {
+      box-shadow: 0 0 0 3px #0000aa;
+    }
+    .theme-item input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .theme-preview-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .theme-name {
+      text-align: center;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+    }
+    .option-list {
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       margin-bottom: 16px;
     }
-    .theme-option, .option-item {
+    .option-item {
       display: flex;
       align-items: center;
       padding: 14px 16px;
@@ -44,39 +83,29 @@
       border-bottom: 1px solid #eee;
       transition: background 0.2s;
     }
-    .theme-option:last-child, .option-item:last-child {
+    .option-item:last-child {
       border-bottom: none;
     }
-    .theme-option:hover, .option-item:hover {
+    .option-item:hover {
       background: #f9f9f9;
     }
-    .theme-option input[type="radio"], .option-item input[type="checkbox"] {
+    .option-item input[type="checkbox"] {
       width: 20px;
       height: 20px;
       margin-right: 12px;
       cursor: pointer;
     }
-    .theme-info, .option-info {
+    .option-info {
       flex: 1;
     }
-    .theme-name, .option-name {
+    .option-name {
       font-weight: 600;
       color: #333;
       margin-bottom: 2px;
     }
-    .theme-desc, .option-desc {
+    .option-desc {
       font-size: 12px;
       color: #666;
-    }
-    .theme-preview {
-      display: flex;
-      gap: 6px;
-    }
-    .color-dot {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: 2px solid #ddd;
     }
     .btn-save {
       width: 100%;
@@ -100,77 +129,41 @@
     <h1>Naos Watchface</h1>
     
     <h2>Theme</h2>
-    <div class="theme-list">
-      <label class="theme-option">
+    <div class="theme-grid">
+      <label class="theme-item" data-theme="0">
         <input type="radio" name="theme" value="0" checked>
-        <div class="theme-info">
-          <div class="theme-name">Classic</div>
-          <div class="theme-desc">White dial, blue hands</div>
-        </div>
-        <div class="theme-preview">
-          <div class="color-dot" style="background: #ffffff;"></div>
-          <div class="color-dot" style="background: #0000aa;"></div>
-        </div>
+        <img src="../../resources/white.png" alt="Classic" class="theme-preview-img">
+        <div class="theme-name">Classic</div>
       </label>
       
-      <label class="theme-option">
+      <label class="theme-item" data-theme="1">
         <input type="radio" name="theme" value="1">
-        <div class="theme-info">
-          <div class="theme-name">Black</div>
-          <div class="theme-desc">Black dial, white hands</div>
-        </div>
-        <div class="theme-preview">
-          <div class="color-dot" style="background: #000000;"></div>
-          <div class="color-dot" style="background: #ffffff;"></div>
-        </div>
+        <img src="../../resources/black.png" alt="Black" class="theme-preview-img">
+        <div class="theme-name">Black</div>
       </label>
       
-      <label class="theme-option">
+      <label class="theme-item" data-theme="2">
         <input type="radio" name="theme" value="2">
-        <div class="theme-info">
-          <div class="theme-name">Forest</div>
-          <div class="theme-desc">Teal dial, brown hands</div>
-        </div>
-        <div class="theme-preview">
-          <div class="color-dot" style="background: #005555;"></div>
-          <div class="color-dot" style="background: #aa5500;"></div>
-        </div>
+        <img src="../../resources/forest.png" alt="Forest" class="theme-preview-img">
+        <div class="theme-name">Forest</div>
       </label>
       
-      <label class="theme-option">
+      <label class="theme-item" data-theme="3">
         <input type="radio" name="theme" value="3">
-        <div class="theme-info">
-          <div class="theme-name">Pastel</div>
-          <div class="theme-desc">Light dial, dark red hands</div>
-        </div>
-        <div class="theme-preview">
-          <div class="color-dot" style="background: #ffffaa;"></div>
-          <div class="color-dot" style="background: #550000;"></div>
-        </div>
+        <img src="../../resources/pastel.png" alt="Pastel" class="theme-preview-img">
+        <div class="theme-name">Pastel</div>
       </label>
       
-      <label class="theme-option">
+      <label class="theme-item" data-theme="4">
         <input type="radio" name="theme" value="4">
-        <div class="theme-info">
-          <div class="theme-name">Blue</div>
-          <div class="theme-desc">Blue dial, gray hands</div>
-        </div>
-        <div class="theme-preview">
-          <div class="color-dot" style="background: #0000aa;"></div>
-          <div class="color-dot" style="background: #aaaaaa;"></div>
-        </div>
+        <img src="../../resources/blue.png" alt="Blue" class="theme-preview-img">
+        <div class="theme-name">Blue</div>
       </label>
       
-      <label class="theme-option">
+      <label class="theme-item" data-theme="5">
         <input type="radio" name="theme" value="5">
-        <div class="theme-info">
-          <div class="theme-name">Rose</div>
-          <div class="theme-desc">Dark red dial, pink hands</div>
-        </div>
-        <div class="theme-preview">
-          <div class="color-dot" style="background: #550000;"></div>
-          <div class="color-dot" style="background: #ffaaaa;"></div>
-        </div>
+        <img src="../../resources/rose.png" alt="Rose" class="theme-preview-img">
+        <div class="theme-name">Rose</div>
       </label>
     </div>
     
@@ -231,7 +224,39 @@
     // Initialize UI
     document.querySelectorAll('input[name="theme"]').forEach(function(radio) {
       radio.checked = (parseInt(radio.value) === settings.theme);
+      updateThemeSelection(parseInt(radio.value));
     });
+    
+    // Add click handlers for visual selection
+    document.querySelectorAll('.theme-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var themeId = this.getAttribute('data-theme');
+        document.querySelectorAll('input[name="theme"]').forEach(function(radio) {
+          radio.checked = (radio.value === themeId);
+        });
+        updateAllThemeSelections();
+      });
+    });
+    
+    function updateThemeSelection(themeId) {
+      var item = document.querySelector('.theme-item[data-theme="' + themeId + '"]');
+      if (item) {
+        var radio = item.querySelector('input[type="radio"]');
+        if (radio.checked) {
+          item.classList.add('selected');
+        } else {
+          item.classList.remove('selected');
+        }
+      }
+    }
+    
+    function updateAllThemeSelections() {
+      document.querySelectorAll('.theme-item').forEach(function(item) {
+        var themeId = item.getAttribute('data-theme');
+        updateThemeSelection(parseInt(themeId));
+      });
+    }
+    
     document.getElementById('branding').checked = settings.branding;
     document.getElementById('date').checked = settings.date;
     document.getElementById('seconds').checked = settings.seconds;
