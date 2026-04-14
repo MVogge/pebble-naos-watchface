@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Naos Theme</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 24px;
+    }
+    .theme-list {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .theme-option {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+    .theme-option:last-child {
+      border-bottom: none;
+    }
+    .theme-option:hover {
+      background: #f9f9f9;
+    }
+    .theme-option input {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+    .theme-info {
+      flex: 1;
+    }
+    .theme-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .theme-desc {
+      font-size: 13px;
+      color: #666;
+    }
+    .theme-preview {
+      display: flex;
+      gap: 6px;
+    }
+    .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+    }
+    .btn-save {
+      width: 100%;
+      padding: 16px;
+      background: #0000aa;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-save:active {
+      background: #000088;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Naos Theme</h1>
+    
+    <div class="theme-list">
+      <label class="theme-option">
+        <input type="radio" name="theme" value="0" checked>
+        <div class="theme-info">
+          <div class="theme-name">Klassisch</div>
+          <div class="theme-desc">Weißes Zifferblatt, blaue Zeiger</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-dot" style="background: #ffffff;"></div>
+          <div class="color-dot" style="background: #0000aa;"></div>
+        </div>
+      </label>
+      
+      <label class="theme-option">
+        <input type="radio" name="theme" value="1">
+        <div class="theme-info">
+          <div class="theme-name">Schwarz</div>
+          <div class="theme-desc">Schwarzes Zifferblatt, weiße Zeiger</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-dot" style="background: #000000;"></div>
+          <div class="color-dot" style="background: #ffffff;"></div>
+        </div>
+      </label>
+    </div>
+    
+    <button class="btn-save" onclick="saveTheme()">Speichern</button>
+  </div>
+
+  <script>
+    // Gespeichertes Theme laden
+    var currentTheme = 0;
+    if (location.hash) {
+      var match = location.hash.match(/theme=(\d)/);
+      if (match) {
+        currentTheme = parseInt(match[1]);
+      }
+    }
+    
+    // Radio-Button setzen
+    document.querySelectorAll('input[name="theme"]').forEach(function(radio) {
+      radio.checked = (parseInt(radio.value) === currentTheme);
+    });
+
+    function saveTheme() {
+      var selected = document.querySelector('input[name="theme"]:checked');
+      var themeValue = selected ? parseInt(selected.value) : 0;
+      
+      var returnTo = getQueryParam('return_to') || 'pebblejs://close#';
+      var config = { Theme: themeValue };
+      
+      location.href = returnTo + encodeURIComponent(JSON.stringify(config));
+    }
+
+    function getQueryParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+  </script>
+</body>
+</html>
