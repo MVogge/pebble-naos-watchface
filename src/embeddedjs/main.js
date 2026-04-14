@@ -24,7 +24,7 @@ const themes = {
         background: render.makeColor(0, 85, 85),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(170, 85, 0),
-        dateShadow: render.makeColor(0, 85, 0)
+        dateShadow: render.makeColor(0, 0, 0)
     },
     3: { // Pastel
         background: render.makeColor(255, 255, 170),
@@ -42,7 +42,7 @@ const themes = {
         background: render.makeColor(85, 0, 0),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(255, 170, 170),
-        dateShadow: render.makeColor(85, 85, 85)
+        dateShadow: render.makeColor(0, 0, 0)
     }
 };
 
