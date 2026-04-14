@@ -18,7 +18,25 @@ const themes = {
     background: render.makeColor(0, 0, 0),
     foreground: render.makeColor(255, 255, 255),
     accent: render.makeColor(255, 255, 255),
-    dateShadow: render.makeColor(85, 85, 85) // #555555
+    dateShadow: render.makeColor(85, 85, 85)
+  },
+  2: { // Choco
+    background: render.makeColor(85, 0, 0),
+    foreground: render.makeColor(255, 255, 255),
+    accent: render.makeColor(255, 255, 85),
+    dateShadow: render.makeColor(85, 0, 85)
+  },
+  3: { // Pastel
+    background: render.makeColor(255, 255, 170),
+    foreground: render.makeColor(0, 0, 0),
+    accent: render.makeColor(85, 0, 0),
+    dateShadow: render.makeColor(170, 170, 170)
+  },
+  4: { // Blue
+    background: render.makeColor(0, 0, 170),
+    foreground: render.makeColor(255, 255, 255),
+    accent: render.makeColor(170, 170, 170),
+    dateShadow: render.makeColor(0, 0, 85)
   }
 };
 
@@ -33,7 +51,7 @@ try {
     currentTheme = themes[currentThemeId];
   }
 } catch (e) {
-  console.log('Error loading theme: ' + e);
+  // Silent fail
 }
 
 // Message API für Theme-Änderungen vom Phone
@@ -41,33 +59,28 @@ const message = new Message({
   keys: ["Theme"],
   onReadable() {
     const msg = this.read();
-    console.log('Message received: ' + JSON.stringify([...msg]));
-    
     const themeId = msg.get("Theme");
-    console.log('Theme ID from message: ' + themeId);
     
     if (themeId !== undefined && themes[themeId]) {
       currentThemeId = parseInt(themeId);
       currentTheme = themes[currentThemeId];
-      console.log('Theme changed to: ' + currentThemeId);
       
       try {
         localStorage.setItem('naos_theme', currentThemeId.toString());
       } catch (err) {
-        console.log('Error saving theme: ' + err);
+        // Silent fail
       }
       
       // Sofort neu zeichnen
       const now = new Date();
       drawAnalogClock({ date: now });
-      console.log('Redraw triggered');
     }
   },
   onWritable() {
-    console.log('Message ready to send');
+    // Ready to send
   },
   onSuspend() {
-    console.log('Message suspended');
+    // Suspended
   }
 });
 
@@ -279,4 +292,3 @@ watch.addEventListener("minutechange", drawAnalogClock);
 // Initiales Zeichnen beim Start
 const now = new Date();
 drawAnalogClock({ date: now });
-console.log('Initial draw complete');
