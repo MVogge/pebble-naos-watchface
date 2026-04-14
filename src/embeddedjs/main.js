@@ -36,7 +36,7 @@ const themes = {
         background: render.makeColor(0, 0, 170),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(170, 170, 170),
-        dateShadow: render.makeColor(0, 0, 85)
+        dateShadow: render.makeColor(0, 0, 0)
     },
     5: { // Rose
         background: render.makeColor(85, 0, 0),
