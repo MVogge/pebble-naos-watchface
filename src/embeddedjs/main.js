@@ -8,80 +8,134 @@ const fontDate = new render.Font('Roboto-Condensed', 21)
 
 // Theme-Definitionen
 const themes = {
-  0: { // Klassisch
-    background: render.makeColor(255, 255, 255),
-    foreground: render.makeColor(0, 0, 0),
-    accent: render.makeColor(0, 0, 170),
-    dateShadow: render.makeColor(170, 170, 170)
-  },
-  1: { // Schwarz
-    background: render.makeColor(0, 0, 0),
-    foreground: render.makeColor(255, 255, 255),
-    accent: render.makeColor(255, 255, 255),
-    dateShadow: render.makeColor(85, 85, 85)
-  },
-  2: { // Choco
-    background: render.makeColor(85, 0, 0),
-    foreground: render.makeColor(255, 255, 255),
-    accent: render.makeColor(255, 255, 85),
-    dateShadow: render.makeColor(85, 0, 85)
-  },
-  3: { // Pastel
-    background: render.makeColor(255, 255, 170),
-    foreground: render.makeColor(0, 0, 0),
-    accent: render.makeColor(85, 0, 0),
-    dateShadow: render.makeColor(170, 170, 170)
-  },
-  4: { // Blue
-    background: render.makeColor(0, 0, 170),
-    foreground: render.makeColor(255, 255, 255),
-    accent: render.makeColor(170, 170, 170),
-    dateShadow: render.makeColor(0, 0, 85)
-  }
+    0: { // Klassisch
+        background: render.makeColor(255, 255, 255),
+        foreground: render.makeColor(0, 0, 0),
+        accent: render.makeColor(0, 0, 170),
+        dateShadow: render.makeColor(170, 170, 170)
+    },
+    1: { // Schwarz
+        background: render.makeColor(0, 0, 0),
+        foreground: render.makeColor(255, 255, 255),
+        accent: render.makeColor(255, 255, 255),
+        dateShadow: render.makeColor(85, 85, 85)
+    },
+    2: { // Forest
+        background: render.makeColor(0, 85, 85),
+        foreground: render.makeColor(255, 255, 255),
+        accent: render.makeColor(170, 85, 0),
+        dateShadow: render.makeColor(0, 85, 0)
+    },
+    3: { // Pastel
+        background: render.makeColor(255, 255, 170),
+        foreground: render.makeColor(0, 0, 0),
+        accent: render.makeColor(85, 0, 0),
+        dateShadow: render.makeColor(170, 170, 170)
+    },
+    4: { // Blue
+        background: render.makeColor(0, 0, 170),
+        foreground: render.makeColor(255, 255, 255),
+        accent: render.makeColor(170, 170, 170),
+        dateShadow: render.makeColor(0, 0, 85)
+    },
+    5: { // Rose
+        background: render.makeColor(85, 0, 0),
+        foreground: render.makeColor(255, 255, 255),
+        accent: render.makeColor(255, 170, 170),
+        dateShadow: render.makeColor(85, 85, 85)
+    }
 };
 
 // Aktuelles Theme laden (persistiert)
-let currentTheme = themes[0]; // Default: Klassisch
+let currentTheme = themes[0];
 let currentThemeId = 0;
 
-try {
-  const savedTheme = localStorage.getItem('naos_theme');
-  if (savedTheme !== null && themes[savedTheme]) {
-    currentThemeId = parseInt(savedTheme);
-    currentTheme = themes[currentThemeId];
-  }
-} catch (e) {
-  // Silent fail
+// Optionen (persistiert)
+let showBranding = true;
+let showDate = true;
+let showSeconds = false;
+
+function loadSettings() {
+    try {
+        const savedTheme = localStorage.getItem('naos_theme');
+        if (savedTheme !== null && themes[savedTheme]) {
+            currentThemeId = parseInt(savedTheme);
+            currentTheme = themes[currentThemeId];
+        }
+
+        const savedBranding = localStorage.getItem('naos_branding');
+        if (savedBranding !== null) showBranding = savedBranding === '1';
+
+        const savedDate = localStorage.getItem('naos_date');
+        if (savedDate !== null) showDate = savedDate === '1';
+
+        const savedSeconds = localStorage.getItem('naos_seconds');
+        if (savedSeconds !== null) showSeconds = savedSeconds === '1';
+    } catch (e) {
+        // Silent fail
+    }
 }
 
-// Message API für Theme-Änderungen vom Phone
+loadSettings();
+
+// Message API für Konfiguration vom Phone
 const message = new Message({
-  keys: ["Theme"],
-  onReadable() {
-    const msg = this.read();
-    const themeId = msg.get("Theme");
-    
-    if (themeId !== undefined && themes[themeId]) {
-      currentThemeId = parseInt(themeId);
-      currentTheme = themes[currentThemeId];
-      
-      try {
-        localStorage.setItem('naos_theme', currentThemeId.toString());
-      } catch (err) {
-        // Silent fail
-      }
-      
-      // Sofort neu zeichnen
-      const now = new Date();
-      drawAnalogClock({ date: now });
+    keys: ["Theme", "ShowBranding", "ShowDate", "ShowSeconds"],
+    onReadable() {
+        const msg = this.read();
+        let needsRedraw = false;
+
+        const themeId = msg.get("Theme");
+        if (themeId !== undefined && themes[themeId]) {
+            currentThemeId = parseInt(themeId);
+            currentTheme = themes[currentThemeId];
+            try {
+                localStorage.setItem('naos_theme', currentThemeId.toString());
+            } catch (e) {
+            }
+            needsRedraw = true;
+        }
+
+        const branding = msg.get("ShowBranding");
+        if (branding !== undefined) {
+            showBranding = branding === 1;
+            try {
+                localStorage.setItem('naos_branding', showBranding ? '1' : '0');
+            } catch (e) {
+            }
+            needsRedraw = true;
+        }
+
+        const date = msg.get("ShowDate");
+        if (date !== undefined) {
+            showDate = date === 1;
+            try {
+                localStorage.setItem('naos_date', showDate ? '1' : '0');
+            } catch (e) {
+            }
+            needsRedraw = true;
+        }
+
+        const seconds = msg.get("ShowSeconds");
+        if (seconds !== undefined) {
+            showSeconds = seconds === 1;
+            try {
+                localStorage.setItem('naos_seconds', showSeconds ? '1' : '0');
+            } catch (e) {
+            }
+            updateSecondTimer();
+            needsRedraw = true;
+        }
+
+        if (needsRedraw) {
+            const now = new Date();
+            drawAnalogClock({date: now});
+        }
+    },
+    onWritable() {
+    },
+    onSuspend() {
     }
-  },
-  onWritable() {
-    // Ready to send
-  },
-  onSuspend() {
-    // Suspended
-  }
 });
 
 function getHandAngles(now) {
@@ -89,10 +143,11 @@ function getHandAngles(now) {
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
 
+    const secondAngle = seconds * 6;
     const minuteAngle = minutes * 6 + seconds * 0.1;
     const hourAngle = hours * 30 + minutes * 0.5;
 
-    return {hourAngle, minuteAngle};
+    return {hourAngle, minuteAngle, secondAngle};
 }
 
 function toRadians(angle) {
@@ -103,60 +158,48 @@ function drawHand(cx, cy, angle, length, color, thickness) {
     const radians = toRadians(angle);
     const perpRad = radians + Math.PI / 2;
 
-    // Proportions for Naos-style hand
     const shaftLength = length - 11;
     const halfThick = thickness / 2;
 
-    // End of shaft (where tip begins)
     const shaftEndX = cx + Math.cos(radians) * shaftLength;
     const shaftEndY = cy + Math.sin(radians) * shaftLength;
 
-    // Tip point
     const tipX = cx + Math.cos(radians) * length;
     const tipY = cy + Math.sin(radians) * length;
 
-    // Draw shaft as simple thick line
     render.drawLine(cx, cy, shaftEndX, shaftEndY, color, thickness);
 
-    // Draw tip as filled triangle using scanlines
     const tipBaseX1 = shaftEndX + Math.cos(perpRad) * halfThick;
     const tipBaseY1 = shaftEndY + Math.sin(perpRad) * halfThick;
     const tipBaseX2 = shaftEndX - Math.cos(perpRad) * halfThick;
     const tipBaseY2 = shaftEndY - Math.sin(perpRad) * halfThick;
 
-    // Triangle points: base1, base2, tip
     const points = [
         {x: tipBaseX1, y: tipBaseY1},
         {x: tipBaseX2, y: tipBaseY2},
         {x: tipX, y: tipY}
     ];
 
-    // Find bounding box of tip
     const minY = Math.min(tipBaseY1, tipBaseY2, tipY);
     const maxY = Math.max(tipBaseY1, tipBaseY2, tipY);
 
-    // Fill triangle with horizontal scanlines
     const steps = Math.ceil(maxY - minY);
     for (let i = 0; i <= steps; i++) {
         const y = minY + i;
         if (y < 0 || y >= render.height) continue;
 
-        // Find intersections with triangle edges
         const intersections = [];
         for (let j = 0; j < 3; j++) {
             const p1 = points[j];
             const p2 = points[(j + 1) % 3];
 
-            // Check if edge crosses this y
             if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) {
-                // Calculate intersection x
                 const t = (y - p1.y) / (p2.y - p1.y);
                 const x = p1.x + t * (p2.x - p1.x);
                 intersections.push(x);
             }
         }
 
-        // Draw line between intersection points
         if (intersections.length >= 2) {
             intersections.sort((a, b) => a - b);
             const x1 = Math.max(0, intersections[0]);
@@ -168,7 +211,6 @@ function drawHand(cx, cy, angle, length, color, thickness) {
     }
 }
 
-// Draw tick marks - further inside (Naos style)
 function drawTicks(cx, cy, radius) {
     for (let i = 0; i < 60; i++) {
         let tickRadius = radius * 0.8;
@@ -179,7 +221,7 @@ function drawTicks(cx, cy, radius) {
         const isEvenHour = i % 5 === 0 && i % 10 === 0;
         const is6Hour = i === 30;
         let tickLength = 6
-        if (is6Hour) {
+        if (showDate && is6Hour) {
             tickLength = 10;
         } else if (isEvenHour) {
             tickLength = 13;
@@ -201,7 +243,6 @@ function drawTicks(cx, cy, radius) {
     }
 }
 
-// Draw numbers outside the ticks (Naos style) - UPRIGHT/Horizontal
 function drawNumbers(cx, cy, radius) {
     const positions = [
         {num: 12, angle: 0},
@@ -235,7 +276,6 @@ function drawBranding(radius) {
     render.drawText(msg, fontBold, currentTheme.foreground, x, y)
 }
 
-// Draw date at 6 o'clock position with frame shadow
 function drawDate(cx, cy, radius, date) {
     const day = date.getDate();
     const dayStr = day.toString();
@@ -250,16 +290,11 @@ function drawDate(cx, cy, radius, date) {
 
     const shadowColor = currentTheme.dateShadow;
 
-    // Top shadow
     render.fillRectangle(shadowColor, boxX, boxY, boxWidth, 6);
-    // Right shadow
     render.fillRectangle(shadowColor, boxX + boxWidth - 3, boxY, 3, boxHeight);
-    // Bottom shadow
     render.fillRectangle(shadowColor, boxX, boxY + boxHeight - 1, boxWidth, 1);
-    // Left shadow
     render.fillRectangle(shadowColor, boxX, boxY, 1, boxHeight);
 
-    // Draw day number centered
     render.drawText(dayStr, fontDate, currentTheme.foreground, cx - textWidth / 2, dateY - fontDate.height / 2);
 }
 
@@ -268,27 +303,52 @@ function drawAnalogClock(e) {
     const cy = render.height / 2;
     const radius = Math.min(cx, cy) - 2;
 
-    const {hourAngle, minuteAngle} = getHandAngles(e.date);
+    const {hourAngle, minuteAngle, secondAngle} = getHandAngles(e.date);
 
     render.begin();
     render.fillRectangle(currentTheme.background, 0, 0, render.width, render.height);
 
     drawTicks(cx, cy, radius);
     drawNumbers(cx, cy, radius);
-    drawDate(cx, cy, radius, e.date);
 
-    drawBranding(radius);
+    if (showDate) drawDate(cx, cy, radius, e.date);
+    if (showBranding) drawBranding(radius);
 
     drawHand(cx, cy, hourAngle, radius * 0.65, currentTheme.accent, 5);
     drawHand(cx, cy, minuteAngle, radius * 0.95, currentTheme.accent, 5);
+
+    if (showSeconds) {
+        drawHand(cx, cy, secondAngle, radius * 0.95, currentTheme.accent, 2);
+    }
 
     render.drawCircle(currentTheme.accent, cx, cy, 7, 0, 360);
 
     render.end();
 }
 
-watch.addEventListener("minutechange", drawAnalogClock);
+// Timer für Sekundenzeiger
+let secondTimer = null;
 
-// Initiales Zeichnen beim Start
+function updateSecondTimer() {
+    if (secondTimer) {
+        secondTimer.close();
+        secondTimer = null;
+    }
+
+    if (showSeconds) {
+        secondTimer = Timer.repeat(function () {
+            const now = new Date();
+            drawAnalogClock({date: now});
+        }, 1000);
+    }
+}
+
+// Event Listener
+watch.addEventListener("minutechange", function (e) {
+    drawAnalogClock(e);
+});
+
+// Initiales Zeichnen
 const now = new Date();
-drawAnalogClock({ date: now });
+drawAnalogClock({date: now});
+updateSecondTimer();

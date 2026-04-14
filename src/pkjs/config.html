@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Naos Theme</title>
+  <title>Naos Watchface</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -20,45 +20,52 @@
       text-align: center;
       color: #333;
       font-size: 20px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
-    .theme-list {
+    h2 {
+      font-size: 14px;
+      color: #666;
+      margin: 16px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .theme-list, .option-list {
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
-    .theme-option {
+    .theme-option, .option-item {
       display: flex;
       align-items: center;
-      padding: 16px;
+      padding: 14px 16px;
       cursor: pointer;
       border-bottom: 1px solid #eee;
       transition: background 0.2s;
     }
-    .theme-option:last-child {
+    .theme-option:last-child, .option-item:last-child {
       border-bottom: none;
     }
-    .theme-option:hover {
+    .theme-option:hover, .option-item:hover {
       background: #f9f9f9;
     }
-    .theme-option input {
+    .theme-option input[type="radio"], .option-item input[type="checkbox"] {
       width: 20px;
       height: 20px;
       margin-right: 12px;
       cursor: pointer;
     }
-    .theme-info {
+    .theme-info, .option-info {
       flex: 1;
     }
-    .theme-name {
+    .theme-name, .option-name {
       font-weight: 600;
       color: #333;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
-    .theme-desc {
-      font-size: 13px;
+    .theme-desc, .option-desc {
+      font-size: 12px;
       color: #666;
     }
     .theme-preview {
@@ -81,6 +88,7 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      margin-top: 8px;
     }
     .btn-save:active {
       background: #000088;
@@ -89,14 +97,15 @@
 </head>
 <body>
   <div class="container">
-    <h1>Naos Theme</h1>
+    <h1>Naos Watchface</h1>
     
+    <h2>Theme</h2>
     <div class="theme-list">
       <label class="theme-option">
         <input type="radio" name="theme" value="0" checked>
         <div class="theme-info">
-          <div class="theme-name">Klassisch</div>
-          <div class="theme-desc">Weißes Zifferblatt, blaue Zeiger</div>
+          <div class="theme-name">Classic</div>
+          <div class="theme-desc">White dial, blue hands</div>
         </div>
         <div class="theme-preview">
           <div class="color-dot" style="background: #ffffff;"></div>
@@ -107,8 +116,8 @@
       <label class="theme-option">
         <input type="radio" name="theme" value="1">
         <div class="theme-info">
-          <div class="theme-name">Schwarz</div>
-          <div class="theme-desc">Schwarzes Zifferblatt, weiße Zeiger</div>
+          <div class="theme-name">Black</div>
+          <div class="theme-desc">Black dial, white hands</div>
         </div>
         <div class="theme-preview">
           <div class="color-dot" style="background: #000000;"></div>
@@ -119,12 +128,12 @@
       <label class="theme-option">
         <input type="radio" name="theme" value="2">
         <div class="theme-info">
-          <div class="theme-name">Choco</div>
-          <div class="theme-desc">Dunkelrotes Zifferblatt, gelbe Zeiger</div>
+          <div class="theme-name">Forest</div>
+          <div class="theme-desc">Teal dial, brown hands</div>
         </div>
         <div class="theme-preview">
-          <div class="color-dot" style="background: #550000;"></div>
-          <div class="color-dot" style="background: #ffff55;"></div>
+          <div class="color-dot" style="background: #005555;"></div>
+          <div class="color-dot" style="background: #aa5500;"></div>
         </div>
       </label>
       
@@ -132,7 +141,7 @@
         <input type="radio" name="theme" value="3">
         <div class="theme-info">
           <div class="theme-name">Pastel</div>
-          <div class="theme-desc">Helles Zifferblatt, dunkelrote Zeiger</div>
+          <div class="theme-desc">Light dial, dark red hands</div>
         </div>
         <div class="theme-preview">
           <div class="color-dot" style="background: #ffffaa;"></div>
@@ -144,40 +153,99 @@
         <input type="radio" name="theme" value="4">
         <div class="theme-info">
           <div class="theme-name">Blue</div>
-          <div class="theme-desc">Blaues Zifferblatt, graue Zeiger</div>
+          <div class="theme-desc">Blue dial, gray hands</div>
         </div>
         <div class="theme-preview">
           <div class="color-dot" style="background: #0000aa;"></div>
           <div class="color-dot" style="background: #aaaaaa;"></div>
         </div>
       </label>
+      
+      <label class="theme-option">
+        <input type="radio" name="theme" value="5">
+        <div class="theme-info">
+          <div class="theme-name">Rose</div>
+          <div class="theme-desc">Dark red dial, pink hands</div>
+        </div>
+        <div class="theme-preview">
+          <div class="color-dot" style="background: #550000;"></div>
+          <div class="color-dot" style="background: #ffaaaa;"></div>
+        </div>
+      </label>
     </div>
     
-    <button class="btn-save" onclick="saveTheme()">Speichern</button>
+    <h2>Options</h2>
+    <div class="option-list">
+      <label class="option-item">
+        <input type="checkbox" id="branding" checked>
+        <div class="option-info">
+          <div class="option-name">Branding</div>
+          <div class="option-desc">Show "P E B B L E" text</div>
+        </div>
+      </label>
+      
+      <label class="option-item">
+        <input type="checkbox" id="date" checked>
+        <div class="option-info">
+          <div class="option-name">Date</div>
+          <div class="option-desc">Show current date</div>
+        </div>
+      </label>
+      
+      <label class="option-item">
+        <input type="checkbox" id="seconds">
+        <div class="option-info">
+          <div class="option-name">Seconds Hand</div>
+          <div class="option-desc">Show seconds hand (uses more battery)</div>
+        </div>
+      </label>
+    </div>
+    
+    <button class="btn-save" onclick="saveConfig()">Save</button>
   </div>
 
   <script>
-    // Gespeichertes Theme laden
-    var currentTheme = 0;
+    // Load saved settings
+    var settings = {
+      theme: 0,
+      branding: true,
+      date: true,
+      seconds: false
+    };
+    
     if (location.hash) {
-      var match = location.hash.match(/theme=(\d)/);
-      if (match) {
-        currentTheme = parseInt(match[1]);
-      }
+      var params = location.hash.substring(1).split('&');
+      params.forEach(function(param) {
+        var parts = param.split('=');
+        if (parts.length === 2) {
+          var key = parts[0];
+          var value = parts[1];
+          if (key === 'theme') settings.theme = parseInt(value);
+          if (key === 'branding') settings.branding = value === '1';
+          if (key === 'date') settings.date = value === '1';
+          if (key === 'seconds') settings.seconds = value === '1';
+        }
+      });
     }
     
-    // Radio-Button setzen
+    // Initialize UI
     document.querySelectorAll('input[name="theme"]').forEach(function(radio) {
-      radio.checked = (parseInt(radio.value) === currentTheme);
+      radio.checked = (parseInt(radio.value) === settings.theme);
     });
+    document.getElementById('branding').checked = settings.branding;
+    document.getElementById('date').checked = settings.date;
+    document.getElementById('seconds').checked = settings.seconds;
 
-    function saveTheme() {
+    function saveConfig() {
       var selected = document.querySelector('input[name="theme"]:checked');
-      var themeValue = selected ? parseInt(selected.value) : 0;
+      var config = {
+        Theme: selected ? parseInt(selected.value) : 0,
+        ShowBranding: document.getElementById('branding').checked ? 1 : 0,
+        ShowDate: document.getElementById('date').checked ? 1 : 0,
+        ShowSeconds: document.getElementById('seconds').checked ? 1 : 0
+      };
       
       var returnTo = getQueryParam('return_to') || 'pebblejs://close#';
-      var config = { Theme: themeValue };
-      
       location.href = returnTo + encodeURIComponent(JSON.stringify(config));
     }
 
