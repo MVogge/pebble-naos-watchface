@@ -12,37 +12,37 @@ const themes = {
         background: render.makeColor(255, 255, 255),
         foreground: render.makeColor(0, 0, 0),
         accent: render.makeColor(0, 0, 170),
-        dateShadow: render.makeColor(170, 170, 170)
+        shadow: render.makeColor(170, 170, 170)
     },
     1: { // Schwarz
         background: render.makeColor(0, 0, 0),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(255, 255, 255),
-        dateShadow: render.makeColor(85, 85, 85)
+        shadow: render.makeColor(85, 85, 85)
     },
     2: { // Forest
         background: render.makeColor(0, 85, 85),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(170, 85, 0),
-        dateShadow: render.makeColor(0, 0, 0)
+        shadow: render.makeColor(0, 0, 0)
     },
     3: { // Pastel
         background: render.makeColor(255, 255, 170),
         foreground: render.makeColor(0, 0, 0),
         accent: render.makeColor(85, 0, 0),
-        dateShadow: render.makeColor(170, 170, 170)
+        shadow: render.makeColor(170, 170, 170)
     },
     4: { // Blue
         background: render.makeColor(0, 0, 170),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(170, 170, 170),
-        dateShadow: render.makeColor(0, 0, 0)
+        shadow: render.makeColor(0, 0, 0)
     },
     5: { // Rose
         background: render.makeColor(85, 0, 0),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(255, 170, 170),
-        dateShadow: render.makeColor(0, 0, 0)
+        shadow: render.makeColor(0, 0, 0)
     }
 };
 
@@ -53,7 +53,7 @@ let currentThemeId = 0;
 // Optionen (persistiert)
 let showBranding = true;
 let showDate = true;
-let showSeconds = false;
+let showSeconds = true;
 
 function loadSettings() {
     try {
@@ -154,7 +154,9 @@ function toRadians(angle) {
     return (angle - 90) * Math.PI / 180;
 }
 
-function drawHand(cx, cy, angle, length, color, thickness, tipLength = 11) {
+function drawHandShadow(cx, cy, angle, length, thickness, shadowOffset, tipLength) {
+    if (shadowOffset <= 0) return;
+    
     const radians = toRadians(angle);
     const perpRad = radians + Math.PI / 2;
 
@@ -167,8 +169,70 @@ function drawHand(cx, cy, angle, length, color, thickness, tipLength = 11) {
     const tipX = cx + Math.cos(radians) * length;
     const tipY = cy + Math.sin(radians) * length;
 
+    const shadowX = -shadowOffset;
+    const shadowY = shadowOffset;
+
+    render.drawLine(cx + shadowX, cy + shadowY, shaftEndX + shadowX, shaftEndY + shadowY, currentTheme.shadow, thickness);
+
+    const tipBaseX1 = shaftEndX + Math.cos(perpRad) * halfThick;
+    const tipBaseY1 = shaftEndY + Math.sin(perpRad) * halfThick;
+    const tipBaseX2 = shaftEndX - Math.cos(perpRad) * halfThick;
+    const tipBaseY2 = shaftEndY - Math.sin(perpRad) * halfThick;
+
+    const shadowPoints = [
+        {x: tipBaseX1 + shadowX, y: tipBaseY1 + shadowY},
+        {x: tipBaseX2 + shadowX, y: tipBaseY2 + shadowY},
+        {x: tipX + shadowX, y: tipY + shadowY}
+    ];
+
+    const minY = Math.min(shadowPoints[0].y, shadowPoints[1].y, shadowPoints[2].y);
+    const maxY = Math.max(shadowPoints[0].y, shadowPoints[1].y, shadowPoints[2].y);
+
+    const steps = Math.ceil(maxY - minY);
+    for (let i = 0; i <= steps; i++) {
+        const y = minY + i;
+        if (y < 0 || y >= render.height) continue;
+
+        const intersections = [];
+        for (let j = 0; j < 3; j++) {
+            const p1 = shadowPoints[j];
+            const p2 = shadowPoints[(j + 1) % 3];
+
+            if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) {
+                const t = (y - p1.y) / (p2.y - p1.y);
+                const x = p1.x + t * (p2.x - p1.x);
+                intersections.push(x);
+            }
+        }
+
+        if (intersections.length >= 2) {
+            intersections.sort((a, b) => a - b);
+            const x1 = Math.max(0, intersections[0]);
+            const x2 = Math.min(render.width, intersections[1]);
+            if (x2 > x1) {
+                render.drawLine(x1, y, x2, y, currentTheme.shadow, 1);
+            }
+        }
+    }
+}
+
+function drawHand(cx, cy, angle, length, color, thickness, tipLength) {
+    const radians = toRadians(angle);
+    const perpRad = radians + Math.PI / 2;
+
+    const shaftLength = length - tipLength;
+    const halfThick = thickness / 2;
+
+    const shaftEndX = cx + Math.cos(radians) * shaftLength;
+    const shaftEndY = cy + Math.sin(radians) * shaftLength;
+
+    const tipX = cx + Math.cos(radians) * length;
+    const tipY = cy + Math.sin(radians) * length;
+
+    // Zeichne Schaft
     render.drawLine(cx, cy, shaftEndX, shaftEndY, color, thickness);
 
+    // Zeichne Spitze als Dreieck
     const tipBaseX1 = shaftEndX + Math.cos(perpRad) * halfThick;
     const tipBaseY1 = shaftEndY + Math.sin(perpRad) * halfThick;
     const tipBaseX2 = shaftEndX - Math.cos(perpRad) * halfThick;
@@ -288,12 +352,10 @@ function drawDate(cx, cy, radius, date) {
     const boxX = cx - boxWidth / 2;
     const boxY = dateY - boxHeight / 2;
 
-    const shadowColor = currentTheme.dateShadow;
-
-    render.fillRectangle(shadowColor, boxX, boxY, boxWidth, 6);
-    render.fillRectangle(shadowColor, boxX + boxWidth - 3, boxY, 3, boxHeight);
-    render.fillRectangle(shadowColor, boxX, boxY + boxHeight - 1, boxWidth, 1);
-    render.fillRectangle(shadowColor, boxX, boxY, 1, boxHeight);
+    render.fillRectangle(currentTheme.shadow, boxX, boxY, boxWidth, 6);
+    render.fillRectangle(currentTheme.shadow, boxX + boxWidth - 3, boxY, 3, boxHeight);
+    render.fillRectangle(currentTheme.shadow, boxX, boxY + boxHeight - 1, boxWidth, 1);
+    render.fillRectangle(currentTheme.shadow, boxX, boxY, 1, boxHeight);
 
     render.drawText(dayStr, fontDate, currentTheme.foreground, cx - textWidth / 2, dateY - fontDate.height / 2);
 }
@@ -314,13 +376,22 @@ function drawAnalogClock(e) {
     if (showDate) drawDate(cx, cy, radius, e.date);
     if (showBranding) drawBranding(radius);
 
-    drawHand(cx, cy, hourAngle, radius * 0.65, currentTheme.accent, 5);
-    drawHand(cx, cy, minuteAngle, radius * 0.95, currentTheme.accent, 5);
+    // 1. ALLE Schatten zuerst zeichnen
+    drawHandShadow(cx, cy, hourAngle, radius * 0.65, 5, 2, 11);
+    drawHandShadow(cx, cy, minuteAngle, radius * 0.95, 5, 3, 11);
+    if (showSeconds) {
+        drawHandShadow(cx, cy, secondAngle, radius * 0.95, 2, 3, 6);
+    }
+    // Mittelpunkt-Schatten
+    render.drawCircle(currentTheme.shadow, cx - 2, cy + 2, 7, 0, 360);
 
+    // 2. DANN ALLE Zeiger zeichnen
+    drawHand(cx, cy, hourAngle, radius * 0.65, currentTheme.accent, 5, 11);
+    drawHand(cx, cy, minuteAngle, radius * 0.95, currentTheme.accent, 5, 11);
     if (showSeconds) {
         drawHand(cx, cy, secondAngle, radius * 0.95, currentTheme.accent, 2, 6);
     }
-
+    // Mittelpunkt
     render.drawCircle(currentTheme.accent, cx, cy, 7, 0, 360);
 
     render.end();
@@ -335,16 +406,16 @@ function updateTimeEventListener() {
         watch.removeEventListener(currentEventListener.type, currentEventListener.handler);
         currentEventListener = null;
     }
-    
+
     // Wähle Event-Typ basierend auf Sekundenzeiger-Einstellung
     const eventType = showSeconds ? "secondchange" : "minutechange";
-    
-    const handler = function(e) {
+
+    const handler = function (e) {
         drawAnalogClock(e);
     };
-    
+
     watch.addEventListener(eventType, handler);
-    currentEventListener = { type: eventType, handler: handler };
+    currentEventListener = {type: eventType, handler: handler};
 }
 
 // Initiales Zeichnen und Event-Listener setzen
