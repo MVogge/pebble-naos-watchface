@@ -1,6 +1,5 @@
 import Poco from "commodetto/Poco";
 import Message from "pebble/message";
-import Timer from "timer";
 
 const render = new Poco(screen);
 const font = new render.Font('Gothic-Regular', 14)
@@ -124,7 +123,7 @@ const message = new Message({
                 localStorage.setItem('naos_seconds', showSeconds ? '1' : '0');
             } catch (e) {
             }
-            updateSecondTimer();
+            updateTimeEventListener();
             needsRedraw = true;
         }
 
@@ -155,11 +154,11 @@ function toRadians(angle) {
     return (angle - 90) * Math.PI / 180;
 }
 
-function drawHand(cx, cy, angle, length, color, thickness) {
+function drawHand(cx, cy, angle, length, color, thickness, tipLength = 11) {
     const radians = toRadians(angle);
     const perpRad = radians + Math.PI / 2;
 
-    const shaftLength = length - 11;
+    const shaftLength = length - tipLength;
     const halfThick = thickness / 2;
 
     const shaftEndX = cx + Math.cos(radians) * shaftLength;
@@ -319,7 +318,7 @@ function drawAnalogClock(e) {
     drawHand(cx, cy, minuteAngle, radius * 0.95, currentTheme.accent, 5);
 
     if (showSeconds) {
-        drawHand(cx, cy, secondAngle, radius * 0.95, currentTheme.accent, 2);
+        drawHand(cx, cy, secondAngle, radius * 0.95, currentTheme.accent, 2, 6);
     }
 
     render.drawCircle(currentTheme.accent, cx, cy, 7, 0, 360);
@@ -327,29 +326,28 @@ function drawAnalogClock(e) {
     render.end();
 }
 
-// Timer für Sekundenzeiger
-let secondTimer = null;
+// Event Listener für Zeit-Updates
+let currentEventListener = null;
 
-function updateSecondTimer() {
-    if (secondTimer) {
-        secondTimer.close();
-        secondTimer = null;
+function updateTimeEventListener() {
+    // Entferne alten Listener falls vorhanden
+    if (currentEventListener) {
+        watch.removeEventListener(currentEventListener.type, currentEventListener.handler);
+        currentEventListener = null;
     }
-
-    if (showSeconds) {
-        secondTimer = Timer.repeat(function () {
-            const now = new Date();
-            drawAnalogClock({date: now});
-        }, 1000);
-    }
+    
+    // Wähle Event-Typ basierend auf Sekundenzeiger-Einstellung
+    const eventType = showSeconds ? "secondchange" : "minutechange";
+    
+    const handler = function(e) {
+        drawAnalogClock(e);
+    };
+    
+    watch.addEventListener(eventType, handler);
+    currentEventListener = { type: eventType, handler: handler };
 }
 
-// Event Listener
-watch.addEventListener("minutechange", function (e) {
-    drawAnalogClock(e);
-});
-
-// Initiales Zeichnen
+// Initiales Zeichnen und Event-Listener setzen
 const now = new Date();
 drawAnalogClock({date: now});
-updateSecondTimer();
+updateTimeEventListener();
