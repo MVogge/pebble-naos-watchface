@@ -1,12 +1,14 @@
 {
   "name": "naos",
-  "author": "Maxi Voggenauer",
-  "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "author": "MXVI",
+  "version": "1.0.1",
+  "keywords": [
+    "pebble-watchface"
+  ],
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "naos",
+    "displayName": "Naos",
     "uuid": "4e807780-e34f-466f-a14b-4506b5f15123",
     "projectType": "moddable",
     "sdkVersion": "3",
@@ -18,7 +20,15 @@
     "watchapp": {
       "watchface": true
     },
-    "messageKeys": ["Theme", "ShowBranding", "ShowDate", "ShowSeconds"],
+    "capabilities": [
+      "configurable"
+    ],
+    "messageKeys": [
+      "Theme",
+      "ShowBranding",
+      "ShowDate",
+      "ShowSeconds"
+    ],
     "resources": {
       "media": []
     }
