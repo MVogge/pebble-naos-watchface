@@ -281,13 +281,3 @@ watch.addEventListener("minutechange", drawAnalogClock);
 const now = new Date();
 drawAnalogClock({ date: now });
 console.log('Initial draw complete');
-
-// Signal an Phone dass wir bereit sind für Konfiguration
-setTimeout(function() {
-  try {
-    watch.sendMessage({ 'JSReady': 1 });
-    console.log('JSReady signal sent');
-  } catch (e) {
-    console.log('Error sending JSReady: ' + e);
-  }
-}, 500);
