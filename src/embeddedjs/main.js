@@ -152,11 +152,11 @@ function drawNumbers(cx, cy, radius) {
     }
 }
 
-function drawBranding() {
+function drawBranding(radius) {
     const msg = "P E B B L E";
     const width = render.getTextWidth(msg, fontBold);
     const x = (render.width - width) / 2;
-    const y = 70
+    const y = (render.height - (radius - 13)) / 2
     render.drawText(msg, fontBold, black, x, y)
 }
 
@@ -202,7 +202,7 @@ function drawAnalogClock(e) {
     drawNumbers(cx, cy, radius);
     drawDate(cx, cy, radius, e.date);
 
-    drawBranding();
+    drawBranding(radius);
 
     drawHand(cx, cy, hourAngle, radius * 0.65, blue, 5);
     drawHand(cx, cy, minuteAngle, radius * 0.95, blue, 5);
