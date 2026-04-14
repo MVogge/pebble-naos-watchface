@@ -15,7 +15,7 @@ Pebble.addEventListener('ready', function() {
 
 Pebble.addEventListener('showConfiguration', function(e) {
   var theme = localStorage.getItem('naos_theme') || '0';
-  var url = 'https://raw.githubusercontent.com/MVogge/naos/main/src/pkjs/config.html';
+  var url = 'https://mvogge.github.io/pebble-naos-watchface/src/pkjs/config.html';
   
   // Für lokale Entwicklung: relative URL verwenden
   // var url = 'file://' + module.uri.replace('index.js', 'config.html');
