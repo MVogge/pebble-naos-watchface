@@ -1,4 +1,5 @@
 import Poco from "commodetto/Poco";
+import Message from "pebble/message";
 
 const render = new Poco(screen);
 const font = new render.Font('Gothic-Regular', 14)
@@ -35,40 +36,38 @@ try {
   console.log('Error loading theme: ' + e);
 }
 
-// Event-Listener für Theme-Änderungen vom Phone
-watch.addEventListener('message', function(e) {
-  console.log('Message received: ' + JSON.stringify(e));
-  
-  // Try different ways to access the data
-  let themeId = undefined;
-  
-  if (e.data && e.data.Theme !== undefined) {
-    themeId = e.data.Theme;
-  } else if (e.Theme !== undefined) {
-    themeId = e.Theme;
-  } else if (e.payload && e.payload.Theme !== undefined) {
-    themeId = e.payload.Theme;
-  }
-  
-  console.log('Theme ID parsed: ' + themeId);
-  
-  if (themeId !== undefined && themes[themeId]) {
-    currentThemeId = parseInt(themeId);
-    currentTheme = themes[currentThemeId];
-    console.log('Theme changed to: ' + currentThemeId);
+// Message API für Theme-Änderungen vom Phone
+const message = new Message({
+  keys: ["Theme"],
+  onReadable() {
+    const msg = this.read();
+    console.log('Message received: ' + JSON.stringify([...msg]));
     
-    try {
-      localStorage.setItem('naos_theme', currentThemeId.toString());
-    } catch (err) {
-      console.log('Error saving theme: ' + err);
+    const themeId = msg.get("Theme");
+    console.log('Theme ID from message: ' + themeId);
+    
+    if (themeId !== undefined && themes[themeId]) {
+      currentThemeId = parseInt(themeId);
+      currentTheme = themes[currentThemeId];
+      console.log('Theme changed to: ' + currentThemeId);
+      
+      try {
+        localStorage.setItem('naos_theme', currentThemeId.toString());
+      } catch (err) {
+        console.log('Error saving theme: ' + err);
+      }
+      
+      // Sofort neu zeichnen
+      const now = new Date();
+      drawAnalogClock({ date: now });
+      console.log('Redraw triggered');
     }
-    
-    // Sofort neu zeichnen
-    const now = new Date();
-    drawAnalogClock({ date: now });
-    console.log('Redraw triggered');
-  } else {
-    console.log('No valid theme found in message');
+  },
+  onWritable() {
+    console.log('Message ready to send');
+  },
+  onSuspend() {
+    console.log('Message suspended');
   }
 });
 

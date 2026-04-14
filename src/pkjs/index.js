@@ -1,38 +1,18 @@
-var initialThemeSent = false;
-
-function sendThemeToWatch(theme, retryCount) {
-  retryCount = retryCount || 0;
-  
-  if (retryCount > 5) {
-    console.log('Max retries reached, giving up');
-    return;
-  }
-  
-  var dict = { 'Theme': parseInt(theme) };
-  console.log('Attempting to send theme (retry ' + retryCount + '): ' + JSON.stringify(dict));
-  
-  Pebble.sendAppMessage(dict, function() {
-    console.log('Theme successfully sent to watch: ' + theme);
-    initialThemeSent = true;
-  }, function(error) {
-    console.log('Error sending theme (retry ' + retryCount + '): ' + JSON.stringify(error));
-    // Retry after 500ms
-    setTimeout(function() {
-      sendThemeToWatch(theme, retryCount + 1);
-    }, 500);
-  });
-}
-
 Pebble.addEventListener('ready', function() {
   console.log('Naos Watchface PKJS ready');
   
-  // Warte kurz bis die Verbindung stabil ist
-  setTimeout(function() {
-    var theme = localStorage.getItem('naos_theme');
-    if (theme !== null && !initialThemeSent) {
-      sendThemeToWatch(theme, 0);
-    }
-  }, 1000);
+  // Gespeichertes Theme beim Start an Uhr senden
+  var theme = localStorage.getItem('naos_theme');
+  if (theme !== null) {
+    var dict = { 'Theme': parseInt(theme) };
+    console.log('Sending initial theme: ' + JSON.stringify(dict));
+    
+    Pebble.sendAppMessage(dict, function() {
+      console.log('Initial theme sent successfully: ' + theme);
+    }, function(error) {
+      console.log('Error sending initial theme: ' + JSON.stringify(error));
+    });
+  }
 });
 
 Pebble.addEventListener('showConfiguration', function(e) {
@@ -59,7 +39,14 @@ Pebble.addEventListener('webviewclosed', function(e) {
       localStorage.setItem('naos_theme', configData.Theme);
       console.log('Theme saved to localStorage: ' + configData.Theme);
       
-      sendThemeToWatch(configData.Theme, 0);
+      var dict = { 'Theme': parseInt(configData.Theme) };
+      console.log('Sending theme to watch: ' + JSON.stringify(dict));
+      
+      Pebble.sendAppMessage(dict, function() {
+        console.log('Theme successfully sent to watch: ' + configData.Theme);
+      }, function(error) {
+        console.log('Error sending theme to watch: ' + JSON.stringify(error));
+      });
     } else {
       console.log('No Theme in config data');
     }
