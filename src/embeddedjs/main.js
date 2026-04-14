@@ -1,5 +1,6 @@
 import Poco from "commodetto/Poco";
 import Message from "pebble/message";
+import Timer from "timer";
 
 const render = new Poco(screen);
 const font = new render.Font('Gothic-Regular', 14)
