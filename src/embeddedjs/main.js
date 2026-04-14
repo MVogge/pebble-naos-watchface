@@ -8,41 +8,47 @@ const fontDate = new render.Font('Roboto-Condensed', 21)
 
 // Theme-Definitionen
 const themes = {
-    0: { // Klassisch
+    0: { // Classic
         background: render.makeColor(255, 255, 255),
         foreground: render.makeColor(0, 0, 0),
         accent: render.makeColor(0, 0, 170),
-        shadow: render.makeColor(170, 170, 170)
+        shadow: render.makeColor(170, 170, 170),
+        handShadow: render.makeColor(170, 170, 170)
     },
-    1: { // Schwarz
+    1: { // Black
         background: render.makeColor(0, 0, 0),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(255, 255, 255),
-        shadow: render.makeColor(85, 85, 85)
+        shadow: render.makeColor(85, 85, 85),
+        handShadow: null
     },
     2: { // Forest
         background: render.makeColor(0, 85, 85),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(170, 85, 0),
-        shadow: render.makeColor(0, 0, 0)
+        shadow: render.makeColor(0, 0, 0),
+        handShadow: render.makeColor(85, 85, 85)
     },
     3: { // Pastel
         background: render.makeColor(255, 255, 170),
         foreground: render.makeColor(0, 0, 0),
         accent: render.makeColor(85, 0, 0),
-        shadow: render.makeColor(170, 170, 170)
+        shadow: render.makeColor(170, 170, 170),
+        handShadow: render.makeColor(170, 170, 170)
     },
     4: { // Blue
         background: render.makeColor(0, 0, 170),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(170, 170, 170),
-        shadow: render.makeColor(0, 0, 0)
+        shadow: render.makeColor(0, 0, 0),
+        handShadow: render.makeColor(0, 0, 0)
     },
     5: { // Rose
         background: render.makeColor(85, 0, 0),
         foreground: render.makeColor(255, 255, 255),
         accent: render.makeColor(255, 170, 170),
-        shadow: render.makeColor(0, 0, 0)
+        shadow: render.makeColor(0, 0, 0),
+        handShadow: render.makeColor(0, 0, 0)
     }
 };
 
@@ -53,7 +59,7 @@ let currentThemeId = 0;
 // Optionen (persistiert)
 let showBranding = true;
 let showDate = true;
-let showSeconds = true;
+let showSeconds = false;
 
 function loadSettings() {
     try {
@@ -156,6 +162,7 @@ function toRadians(angle) {
 
 function drawHandShadow(cx, cy, angle, length, thickness, shadowOffset, tipLength) {
     if (shadowOffset <= 0) return;
+    if (currentTheme.handShadow === null) return;
     
     const radians = toRadians(angle);
     const perpRad = radians + Math.PI / 2;
@@ -172,7 +179,7 @@ function drawHandShadow(cx, cy, angle, length, thickness, shadowOffset, tipLengt
     const shadowX = -shadowOffset;
     const shadowY = shadowOffset;
 
-    render.drawLine(cx + shadowX, cy + shadowY, shaftEndX + shadowX, shaftEndY + shadowY, currentTheme.shadow, thickness);
+    render.drawLine(cx + shadowX, cy + shadowY, shaftEndX + shadowX, shaftEndY + shadowY, currentTheme.handShadow, thickness);
 
     const tipBaseX1 = shaftEndX + Math.cos(perpRad) * halfThick;
     const tipBaseY1 = shaftEndY + Math.sin(perpRad) * halfThick;
@@ -210,7 +217,7 @@ function drawHandShadow(cx, cy, angle, length, thickness, shadowOffset, tipLengt
             const x1 = Math.max(0, intersections[0]);
             const x2 = Math.min(render.width, intersections[1]);
             if (x2 > x1) {
-                render.drawLine(x1, y, x2, y, currentTheme.shadow, 1);
+                render.drawLine(x1, y, x2, y, currentTheme.handShadow, 1);
             }
         }
     }
@@ -383,7 +390,9 @@ function drawAnalogClock(e) {
         drawHandShadow(cx, cy, secondAngle, radius * 0.95, 2, 3, 6);
     }
     // Mittelpunkt-Schatten
-    render.drawCircle(currentTheme.shadow, cx - 2, cy + 2, 7, 0, 360);
+    if (currentTheme.handShadow !== null) {
+        render.drawCircle(currentTheme.handShadow, cx - 2, cy + 2, 7, 0, 360);
+    }
 
     // 2. DANN ALLE Zeiger zeichnen
     drawHand(cx, cy, hourAngle, radius * 0.65, currentTheme.accent, 5, 11);
